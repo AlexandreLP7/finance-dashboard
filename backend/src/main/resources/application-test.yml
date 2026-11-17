@@ -14,3 +14,11 @@ app:
   security:
     user: testuser
     password: testpassword
+  encryption-key: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+
+bank:
+  psd2:
+    base-url: https://sandbox.example/stet
+    client-id: test-client-id
+    client-secret: test-client-secret
+    redirect-uri: http://localhost:5173/bank-callback
