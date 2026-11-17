@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-finance}
+      POSTGRES_USER: ${DB_USER:-finance}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD requis dans .env}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: ghcr.io/alexandrelp7/finance-dashboard/backend:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-finance}
+      DB_USER: ${DB_USER:-finance}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD requis dans .env}
+      APP_USER: ${APP_USER:?APP_USER requis dans .env}
+      APP_PASSWORD: ${APP_PASSWORD:?APP_PASSWORD requis dans .env}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/alexandrelp7/finance-dashboard/frontend:${TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  sonarqube:
+    profiles: ["sonar"]
+    image: sonarqube:community
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonardata:/opt/sonarqube/data
+      - sonarlogs:/opt/sonarqube/logs
+      - sonarext:/opt/sonarqube/extensions
+
+volumes:
+  dbdata:
+  sonardata:
+  sonarlogs:
+  sonarext:
