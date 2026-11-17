@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: finance-dashboard
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:finance}
+    username: ${DB_USER:finance}
+    password: ${DB_PASSWORD:change-me}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  security:
+    user: ${APP_USER:admin}
+    password: ${APP_PASSWORD:change-me}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
