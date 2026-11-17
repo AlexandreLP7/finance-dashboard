@@ -14,6 +14,10 @@ async function handleResponse<T>(response: Response, method: string, path: strin
   if (response.status === 204) {
     return undefined as T
   }
+  if (typeof response.text === 'function') {
+    const text = await response.text()
+    return (text ? JSON.parse(text) : undefined) as T
+  }
   return (await response.json()) as T
 }
 
