@@ -25,6 +25,11 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD requis dans .env}
       APP_USER: ${APP_USER:?APP_USER requis dans .env}
       APP_PASSWORD: ${APP_PASSWORD:?APP_PASSWORD requis dans .env}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?APP_ENCRYPTION_KEY requis dans .env (openssl rand -base64 32)}
+      BANK_PSD2_BASE_URL: ${BANK_PSD2_BASE_URL:-}
+      BANK_PSD2_CLIENT_ID: ${BANK_PSD2_CLIENT_ID:-}
+      BANK_PSD2_CLIENT_SECRET: ${BANK_PSD2_CLIENT_SECRET:-}
+      BANK_PSD2_REDIRECT_URI: ${BANK_PSD2_REDIRECT_URI:-http://localhost:5173/bank-callback}
     depends_on:
       db:
         condition: service_healthy
