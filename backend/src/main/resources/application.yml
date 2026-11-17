@@ -19,6 +19,16 @@ app:
   security:
     user: ${APP_USER:admin}
     password: ${APP_PASSWORD:change-me}
+  # Cle AES 32 octets en base64 pour chiffrer les tokens bancaires au repos.
+  # En prod: APP_ENCRYPTION_KEY obligatoire (valeur dev ci-dessous interdite en prod).
+  encryption-key: ${APP_ENCRYPTION_KEY:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+
+bank:
+  psd2:
+    base-url: ${BANK_PSD2_BASE_URL:}
+    client-id: ${BANK_PSD2_CLIENT_ID:}
+    client-secret: ${BANK_PSD2_CLIENT_SECRET:}
+    redirect-uri: ${BANK_PSD2_REDIRECT_URI:http://localhost:5173/bank-callback}
 
 management:
   endpoints:
