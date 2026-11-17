@@ -1,6 +1,7 @@
 package com.alexandrelp7.finance.repository;
 
 import com.alexandrelp7.finance.domain.Transaction;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
   List<Transaction> findByAccountIdAndDateBetweenOrderByDateDesc(
       Long accountId, LocalDate from, LocalDate to);
+
+  boolean existsByAccountIdAndDateAndAmountAndLabel(
+      Long accountId, LocalDate date, BigDecimal amount, String label);
 }
