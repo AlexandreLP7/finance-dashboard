@@ -1,6 +1,7 @@
 package com.alexandrelp7.finance.web;
 
 import com.alexandrelp7.finance.service.AccountNotFoundException;
+import com.alexandrelp7.finance.service.AuthException;
 import java.time.Instant;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,17 @@ public class RestExceptionHandler {
                 "timestamp", Instant.now().toString(),
                 "status", HttpStatus.NOT_FOUND.value(),
                 "error", "Not Found",
+                "message", ex.getMessage()));
+  }
+
+  @ExceptionHandler(AuthException.class)
+  public ResponseEntity<Map<String, Object>> handleAuth(AuthException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(
+            Map.of(
+                "timestamp", Instant.now().toString(),
+                "status", HttpStatus.UNAUTHORIZED.value(),
+                "error", "Unauthorized",
                 "message", ex.getMessage()));
   }
 
