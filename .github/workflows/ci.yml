@@ -53,7 +53,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
-          path: backend/target/site/jacoco/jacoco.xml
+          # classes compilees requises par Sonar (sonar.java.binaries)
+          path: |
+            backend/target/site/jacoco/jacoco.xml
+            backend/target/classes
           retention-days: 5
 
   frontend-tests:
@@ -100,13 +103,14 @@ jobs:
   sonarqube:
     name: 4-SonarQube (auto-heberge)
     needs: lint
-    runs-on: ubuntu-latest
+    # Runner auto-heberge sur la LXC : SonarQube y tourne (localhost:9000), non expose sur Internet.
+    runs-on: [self-hosted, finance-lxc]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: backend-coverage
-          path: backend/target/site/jacoco
+          path: backend/target
       - uses: actions/download-artifact@v4
         with:
           name: frontend-coverage
