@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import { RouterView, RouterLink } from 'vue-router'
+import { computed } from 'vue'
+import { RouterView, RouterLink, useRouter } from 'vue-router'
+import { useAuthStore } from './stores/auth'
+
+const auth = useAuthStore()
+const router = useRouter()
+const isAuthenticated = computed(() => auth.isAuthenticated)
+
+async function logout() {
+  await auth.logout()
+  await router.push('/login')
+}
 </script>
 
 <template>
   <div class="layout">
-    <nav class="nav">
+    <nav v-if="isAuthenticated" class="nav">
       <span class="brand">Finance Dashboard</span>
       <RouterLink to="/">
         Tableau de bord
@@ -15,6 +26,12 @@ import { RouterView, RouterLink } from 'vue-router'
       <RouterLink to="/analytics">
         Analyses
       </RouterLink>
+      <RouterLink to="/settings">
+        Paramètres
+      </RouterLink>
+      <button class="logout" type="button" @click="logout">
+        Déconnexion
+      </button>
     </nav>
     <main class="content">
       <RouterView />
@@ -46,6 +63,18 @@ import { RouterView, RouterLink } from 'vue-router'
 }
 .nav a.router-link-active {
   color: #38bdf8;
+}
+.logout {
+  margin-left: auto;
+  background: #334155;
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+}
+.logout:hover {
+  background: #475569;
 }
 .content {
   flex: 1;
