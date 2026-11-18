@@ -2,7 +2,6 @@ package com.alexandrelp7.finance.web;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -58,7 +57,7 @@ class AnalyticsControllerTest {
     mockMvc
         .perform(
             get("/api/analytics/summary?accountId=" + accountId + "&months=6")
-                .with(httpBasic("testuser", "testpassword")))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.monthly", hasSize(6)))
         .andExpect(jsonPath("$.byCategory[0].category", is("Logement")));
@@ -67,7 +66,9 @@ class AnalyticsControllerTest {
   @Test
   void adviceRetourneUnConseil() throws Exception {
     mockMvc
-        .perform(get("/api/analytics/advice?accountId=" + accountId).with(httpBasic("testuser", "testpassword")))
+        .perform(
+            get("/api/analytics/advice?accountId=" + accountId)
+                .header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[*].code").isNotEmpty());
   }
@@ -77,7 +78,7 @@ class AnalyticsControllerTest {
     mockMvc
         .perform(
             post("/api/analytics/budgets")
-                .with(httpBasic("testuser", "testpassword"))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
@@ -89,7 +90,9 @@ class AnalyticsControllerTest {
         .andExpect(jsonPath("$.spent").value(400));
 
     mockMvc
-        .perform(get("/api/analytics/budgets?accountId=" + accountId).with(httpBasic("testuser", "testpassword")))
+        .perform(
+            get("/api/analytics/budgets?accountId=" + accountId)
+                .header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].remaining").value(100));
@@ -98,7 +101,9 @@ class AnalyticsControllerTest {
   @Test
   void anomaliesEndpoint() throws Exception {
     mockMvc
-        .perform(get("/api/analytics/anomalies?accountId=" + accountId).with(httpBasic("testuser", "testpassword")))
+        .perform(
+            get("/api/analytics/anomalies?accountId=" + accountId)
+                .header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isOk());
   }
 }
