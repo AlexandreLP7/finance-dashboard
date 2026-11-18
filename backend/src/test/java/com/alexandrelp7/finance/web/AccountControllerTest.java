@@ -1,8 +1,8 @@
 package com.alexandrelp7.finance.web;
 
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,7 +48,7 @@ class AccountControllerTest {
     mockMvc
         .perform(
             post("/api/accounts")
-                .with(httpBasic("testuser", "testpassword"))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
         .andExpect(status().isCreated())
@@ -56,7 +56,7 @@ class AccountControllerTest {
         .andExpect(jsonPath("$.currency", is("EUR")));
 
     mockMvc
-        .perform(get("/api/accounts").with(httpBasic("testuser", "testpassword")))
+        .perform(get("/api/accounts").header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].ibanMasked", is("FR76 **** 1234")));
@@ -65,7 +65,7 @@ class AccountControllerTest {
   @Test
   void getUnknownAccountReturns404() throws Exception {
     mockMvc
-        .perform(get("/api/accounts/9999").with(httpBasic("testuser", "testpassword")))
+        .perform(get("/api/accounts/9999").header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.error", is("Not Found")));
   }
@@ -79,7 +79,7 @@ class AccountControllerTest {
     mockMvc
         .perform(
             post("/api/accounts")
-                .with(httpBasic("testuser", "testpassword"))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
         .andExpect(status().isBadRequest())
