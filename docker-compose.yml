@@ -26,6 +26,9 @@ services:
       APP_USER: ${APP_USER:?APP_USER requis dans .env}
       APP_PASSWORD: ${APP_PASSWORD:?APP_PASSWORD requis dans .env}
       APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?APP_ENCRYPTION_KEY requis dans .env (openssl rand -base64 32)}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET requis dans .env (openssl rand -base64 48)}
+      RATE_LIMIT_AUTH_PER_MINUTE: ${RATE_LIMIT_AUTH_PER_MINUTE:-20}
+      APP_TOTP_ISSUER: ${APP_TOTP_ISSUER:-Finance Dashboard}
       BANK_PSD2_BASE_URL: ${BANK_PSD2_BASE_URL:-}
       BANK_PSD2_CLIENT_ID: ${BANK_PSD2_CLIENT_ID:-}
       BANK_PSD2_CLIENT_SECRET: ${BANK_PSD2_CLIENT_SECRET:-}
