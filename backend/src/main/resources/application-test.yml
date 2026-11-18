@@ -15,6 +15,13 @@ app:
     user: testuser
     password: testpassword
   encryption-key: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+  jwt:
+    secret: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+    access-ttl-seconds: 900
+    refresh-ttl-seconds: 604800
+    pre2fa-ttl-seconds: 300
+  rate-limit:
+    enabled: false
 
 bank:
   psd2:
