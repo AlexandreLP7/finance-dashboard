@@ -19,6 +19,17 @@ app:
   security:
     user: ${APP_USER:admin}
     password: ${APP_PASSWORD:change-me}
+    totp-issuer: ${APP_TOTP_ISSUER:Finance Dashboard}
+  # Secret JWT (>= 32 octets en base64). En prod: JWT_SECRET obligatoire
+  # (la valeur dev ci-dessous est interdite en prod).
+  jwt:
+    secret: ${JWT_SECRET:uOecZbkLAGh8yw7hvqS1RH+UMnV8RfMFTHF6DacY0Wu+FuHHICZYMDgg2R0f1FJsDB9BmEjMho1/jAE6CfOmew==}
+    access-ttl-seconds: ${JWT_ACCESS_TTL:900}
+    refresh-ttl-seconds: ${JWT_REFRESH_TTL:604800}
+    pre2fa-ttl-seconds: ${JWT_PRE2FA_TTL:300}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    auth-requests-per-minute: ${RATE_LIMIT_AUTH_PER_MINUTE:20}
   # Cle AES 32 octets en base64 pour chiffrer les tokens bancaires au repos.
   # En prod: APP_ENCRYPTION_KEY obligatoire (valeur dev ci-dessous interdite en prod).
   encryption-key: ${APP_ENCRYPTION_KEY:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
