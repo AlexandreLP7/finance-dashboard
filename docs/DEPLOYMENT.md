@@ -57,10 +57,27 @@ Ouvrir le port 443 sur la box/routeur vers l'hôte Proxmox (NAT) + DuckDNS point
 
 ## 4. CI/CD GitHub -> LXC
 
-Secrets du dépôt : `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY` (clé dédiée, `~/.ssh/authorized_keys`
-sur la LXC), `DEPLOY_PATH=/opt/finance-dashboard`, plus `SONAR_HOST_URL` / `SONAR_TOKEN`.
-Le workflow `cd.yml` (tag `v*` ou manuel) build les images, les pousse sur ghcr.io,
-puis se connecte en SSH à la LXC pour `docker compose pull && up -d`.
+Le workflow `cd.yml` (tag `v*` ou manuel) build les images, les pousse sur ghcr.io
+(`ghcr.io/alexandrelp7/finance-dashboard/*`, taguées `latest` + SHA), puis le job `deploy`
+tourne sur un **runner GitHub auto-hébergé dans la LXC** : il se connecte lui-même à GitHub,
+donc aucun port SSH n'est exposé sur Internet. Il fait `git reset` sur le commit déployé,
+`docker compose pull && up -d` avec `TAG=<sha>`, puis vérifie que l'API répond.
+
+Installation du runner (une fois, en root sur la LXC) :
+
+```bash
+useradd -m -s /bin/bash runner && usermod -aG docker runner
+chown -R runner:runner /opt/finance-dashboard
+# télécharger actions-runner-linux-x64 (github.com/actions/runner/releases) dans /home/runner/actions-runner
+# token : GitHub > Settings > Actions > Runners > New self-hosted runner
+su - runner -c "cd actions-runner && ./config.sh --unattended --url https://github.com/AlexandreLP7/finance-dashboard \
+  --token <TOKEN> --name finance-lxc --labels finance-lxc"
+cd /home/runner/actions-runner && ./svc.sh install runner && ./svc.sh start
+```
+
+Sécurité (dépôt public) : dans *Settings > Actions > General*, activer
+« Require approval for all external contributors » pour qu'une PR de fork ne puisse pas
+exécuter de code sur le runner. Secrets encore utiles : `SONAR_HOST_URL` / `SONAR_TOKEN` (CI).
 
 ## 5. Sauvegardes
 

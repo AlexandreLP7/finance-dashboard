@@ -11,8 +11,10 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/${{ github.repository }}/backend
-  FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/frontend
+  # Docker exige des noms d'image en minuscules (github.repository contient "AlexandreLP7")
+  BACKEND_IMAGE: ghcr.io/alexandrelp7/finance-dashboard/backend
+  FRONTEND_IMAGE: ghcr.io/alexandrelp7/finance-dashboard/frontend
+  DEPLOY_PATH: /opt/finance-dashboard
 
 jobs:
   build:
@@ -46,15 +48,33 @@ jobs:
   deploy:
     name: Deploiement LXC (Proxmox)
     needs: build
-    runs-on: ubuntu-latest
+    # Runner auto-heberge sur la LXC : aucun port entrant a ouvrir sur la box.
+    runs-on: [self-hosted, finance-lxc]
+    concurrency: deploy-lxc
     steps:
-      - uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_PATH }}
-            docker compose pull
-            docker compose up -d
-            docker image prune -f
+      - name: Login ghcr.io
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Mise a jour du depot (compose, docs)
+        working-directory: ${{ env.DEPLOY_PATH }}
+        run: |
+          git fetch --quiet origin
+          git reset --quiet --hard ${{ github.sha }}
+      - name: Pull + redemarrage
+        working-directory: ${{ env.DEPLOY_PATH }}
+        env:
+          TAG: ${{ github.sha }}
+        run: |
+          docker compose pull db backend frontend
+          docker compose up -d --remove-orphans
+          docker image prune -f
+      - name: Verification
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/ || true)
+            if [ "$code" = "401" ] || [ "$code" = "200" ]; then echo "API OK ($code)"; exit 0; fi
+            sleep 5
+          done
+          echo "API injoignable apres deploiement"; docker compose -f ${{ env.DEPLOY_PATH }}/docker-compose.yml logs --tail 50 backend; exit 1
+      - name: Logout ghcr.io
+        if: always()
+        run: docker logout ghcr.io
