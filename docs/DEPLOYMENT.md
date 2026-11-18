@@ -77,7 +77,12 @@ cd /home/runner/actions-runner && ./svc.sh install runner && ./svc.sh start
 
 Sécurité (dépôt public) : dans *Settings > Actions > General*, activer
 « Require approval for all external contributors » pour qu'une PR de fork ne puisse pas
-exécuter de code sur le runner. Secrets encore utiles : `SONAR_HOST_URL` / `SONAR_TOKEN` (CI).
+exécuter de code sur le runner.
+
+SonarQube (CI) : il tourne sur la LXC (`COMPOSE_PROFILES=sonar` dans `.env`, UI sur
+`http://<IP_LXC>:9000`) et le job `4-SonarQube` s'exécute sur le même runner auto-hébergé.
+Secrets du dépôt : `SONAR_HOST_URL=http://localhost:9000` et `SONAR_TOKEN` (token de projet
+`finance-dashboard` généré dans SonarQube).
 
 ## 5. Sauvegardes
 
