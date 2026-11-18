@@ -2,7 +2,6 @@ package com.alexandrelp7.finance.web;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,7 +43,7 @@ class TransactionControllerTest {
         mockMvc
             .perform(
                 post("/api/accounts")
-                    .with(httpBasic("testuser", "testpassword"))
+                    .header("Authorization", AuthTestSupport.bearer(mockMvc))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(account))
             .andExpect(status().isCreated())
@@ -62,7 +61,7 @@ class TransactionControllerTest {
     mockMvc
         .perform(
             post("/api/accounts/" + accountId + "/transactions")
-                .with(httpBasic("testuser", "testpassword"))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(tx))
         .andExpect(status().isCreated())
@@ -72,7 +71,7 @@ class TransactionControllerTest {
     mockMvc
         .perform(
             get("/api/accounts/" + accountId + "/transactions")
-                .with(httpBasic("testuser", "testpassword")))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)));
   }
@@ -86,7 +85,7 @@ class TransactionControllerTest {
     mockMvc
         .perform(
             post("/api/accounts/" + accountId + "/transactions")
-                .with(httpBasic("testuser", "testpassword"))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(tx))
         .andExpect(status().isCreated());
@@ -94,14 +93,14 @@ class TransactionControllerTest {
     mockMvc
         .perform(
             get("/api/accounts/" + accountId + "/transactions?from=2026-01-01&to=2026-01-31")
-                .with(httpBasic("testuser", "testpassword")))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(0)));
 
     mockMvc
         .perform(
             get("/api/accounts/" + accountId + "/transactions?from=2026-02-01&to=2026-02-28")
-                .with(httpBasic("testuser", "testpassword")))
+                .header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)));
   }
@@ -109,7 +108,9 @@ class TransactionControllerTest {
   @Test
   void transactionsOfUnknownAccountReturn404() throws Exception {
     mockMvc
-        .perform(get("/api/accounts/4242/transactions").with(httpBasic("testuser", "testpassword")))
+        .perform(
+            get("/api/accounts/4242/transactions")
+                .header("Authorization", AuthTestSupport.bearer(mockMvc)))
         .andExpect(status().isNotFound());
   }
 }
