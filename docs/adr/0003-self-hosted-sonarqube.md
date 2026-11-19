@@ -1,8 +1,14 @@
-# ADR 0003 — SonarQube auto-hébergé
+# ADR 0003 — SonarQube auto-hébergé : **RETIRÉ**
 
-- **Décision** : SonarQube Community Edition dans la LXC (profile `sonar`), pas SonarCloud.
-- **Pourquoi** : SonarCloud est payant pour les dépôts privés (~10 €/mois) ; l'auto-hébergé
-  est gratuit et les données restent chez toi. Le dépôt étant public, SonarCloud serait
-  gratuit aussi, mais l'auto-hébergé garde l'analyse 100 % chez toi.
-- **Conséquences** : secrets `SONAR_HOST_URL` / `SONAR_TOKEN` dans GitHub ; job `sonarqube`
-  de la CI (étape 4).
+**Statut : retiré** (2026-11-19). Cette décision est abandonnée : le conteneur
+`sonarqube:community` (2–4 Go de RAM) + le scanner CI provoquaient des OOM-kill du
+runner auto-hébergé sur la LXC applicative.
+
+**Conséquences du retrait :**
+- service `sonarqube` supprimé de `docker-compose.yml` (plus de profile `sonar`) ;
+- job `4-SonarQube` supprimé de `.github/workflows/ci.yml` (CI : init → tests ≥ 60 % → ESLint → vue-tsc) ;
+- secrets `SONAR_HOST_URL` / `SONAR_TOKEN` à supprimer côté GitHub (Settings → Secrets) ;
+- `sonar-project.properties` neutralisé.
+
+Si une analyse statique est réintroduite un jour : préférer SonarCloud (gratuit sur dépôt
+public) ou une instance SonarQube sur une machine avec suffisamment de RAM, hors de la LXC applicative.
