@@ -33,14 +33,7 @@ L'API exige un jeton JWT (`Authorization: Bearer ...`) sauf `/api/auth/login`, `
 - Rate limiting : 20 requêtes/min/IP sur `/api/auth/**` (429 au-delà).
 - Le front stocke le refresh token en `localStorage` et le access token en mémoire ; sur 401 il tente un refresh une fois puis redirige vers `/login`.
 
-## 2. SonarQube (pour la CI, étape 4)
-```bash
-docker compose --profile sonar up -d    # http://LXC_IP:9000
-```
-Puis créer le projet `finance-dashboard` + un token, et ajouter dans le dépôt GitHub
-(Settings → Secrets and variables → Actions) : `SONAR_HOST_URL=http://LXC_IP:9000` (ou via le domaine HTTPS), `SONAR_TOKEN=...`.
-
-## 3. Mise en ligne (nginx + DuckDNS + TLS)
+## 2. Mise en ligne (nginx + DuckDNS + TLS)
 ```bash
 # sur l'hôte nginx (Proxmox ou la LXC)
 cp deploy/nginx-finance-dashboard.conf /etc/nginx/sites-available/finance-dashboard.conf
@@ -51,7 +44,7 @@ nginx -t && systemctl reload nginx
 # NAT box: ouvrir le 443 (et 80) vers l'hôte Proxmox
 ```
 
-## 4. Premier déploiement via le CD
+## 3. Premier déploiement via le CD
 Secrets GitHub (Actions) à créer : `SSH_HOST` (IP publique ou interne de la LXC selon le réseau),
 `SSH_USER`, `SSH_PRIVATE_KEY` (clé dédiée, dans `~/.ssh/authorized_keys` de la LXC), `DEPLOY_PATH=/opt/finance-dashboard`.
 Puis : `git tag v0.1.0 && git push origin v0.1.0` (ou bouton « Run workflow » sur `cd.yml`)
@@ -60,7 +53,7 @@ Puis : `git tag v0.1.0 && git push origin v0.1.0` (ou bouton « Run workflow » 
 Vérifier : `https://DOMAIN.duckdns.org` (page de login APP_USER/APP_PASSWORD, jeton JWT ensuite),
 `/actuator/health` via le proxy interne, onglet Transactions → « Connecter ma banque (PSD2) ».
 
-## 5. Exploitation
+## 4. Exploitation
 - Sauvegardes : `0 3 * * * /opt/finance-dashboard/deploy/backup-pg.sh` (cron LXC).
 - Mises à jour : nouveau tag `vX.Y.Z` → CD automatique.
 - Logs : `docker compose logs -f backend`.
