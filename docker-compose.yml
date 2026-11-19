@@ -45,21 +45,5 @@ services:
     depends_on:
       - backend
 
-  sonarqube:
-    profiles: ["sonar"]
-    image: sonarqube:community
-    restart: unless-stopped
-    ports:
-      - "9000:9000"
-    environment:
-      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
-    volumes:
-      - sonardata:/opt/sonarqube/data
-      - sonarlogs:/opt/sonarqube/logs
-      - sonarext:/opt/sonarqube/extensions
-
 volumes:
   dbdata:
-  sonardata:
-  sonarlogs:
-  sonarext:
