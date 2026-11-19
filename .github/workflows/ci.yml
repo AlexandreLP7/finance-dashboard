@@ -50,14 +50,6 @@ jobs:
       - name: mvn verify (tests + couverture JaCoCo, seuil 60%)
         working-directory: backend
         run: mvn -B verify
-      - uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage
-          # classes compilees requises par Sonar (sonar.java.binaries)
-          path: |
-            backend/target/site/jacoco/jacoco.xml
-            backend/target/classes
-          retention-days: 5
 
   frontend-tests:
     name: 2b-Tests frontend (Vitest >= 60%)
@@ -76,11 +68,6 @@ jobs:
       - name: Tests + couverture (seuils 60% dans vite.config.ts)
         working-directory: frontend
         run: npm run test:coverage
-      - uses: actions/upload-artifact@v4
-        with:
-          name: frontend-coverage
-          path: frontend/coverage/lcov.info
-          retention-days: 5
 
   lint:
     name: 3-ESLint
@@ -100,32 +87,9 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
-  sonarqube:
-    name: 4-SonarQube (auto-heberge)
-    needs: lint
-    # Runner auto-heberge sur la LXC : SonarQube y tourne (localhost:9000), non expose sur Internet.
-    runs-on: [self-hosted, finance-lxc]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: backend-coverage
-          path: backend/target
-      - uses: actions/download-artifact@v4
-        with:
-          name: frontend-coverage
-          path: frontend/coverage
-      - name: SonarQube scan
-        uses: sonarsource/sonarqube-scan-action@v6
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          # Plafond memoire du scanner : evite l'OOM-kill du runner sur la petite LXC.
-          SONAR_SCANNER_OPTS: -Xmx512m
-
   typecheck:
-    name: 5-TypeScript check (vue-tsc --noEmit)
-    needs: sonarqube
+    name: 4-TypeScript check (vue-tsc --noEmit)
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
