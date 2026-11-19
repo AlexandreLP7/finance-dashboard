@@ -9,7 +9,7 @@ ton serveur).
 
 - **Front** : Vue 3 + TypeScript + Vite + Pinia + Vue Router + Apache ECharts
 - **Back** : Java 21 + Spring Boot 3 (Web, Data JPA, Security, Actuator), PostgreSQL + Flyway
-- **CI/CD** : GitHub Actions (CI : init → tests → ESLint → SonarQube → check TypeScript ;
+- **CI/CD** : GitHub Actions (CI : init → tests → ESLint → check TypeScript ;
   CD : images Docker sur ghcr.io → déploiement SSH sur la LXC)
 - **Infra** : LXC Proxmox + Docker Compose + nginx + DuckDNS + Let's Encrypt (DNS-01)
 
@@ -20,10 +20,9 @@ finance-dashboard/
 ├── frontend/            # Vue 3 + TS (Vite, Vitest, ESLint, vue-tsc)
 ├── backend/             # Spring Boot 3 (Maven, JUnit 5, JaCoCo)
 ├── docker/              # Dockerfiles front/back + conf nginx interne
-├── .github/workflows/   # ci.yml (5 étapes) + cd.yml (build + déploiement)
-├── docker-compose.yml   # db + backend + frontend (+ sonarqube en profile "sonar")
-├── docs/                # architecture, déploiement, PSD2, SonarQube, ADR
-└── sonar-project.properties
+├── .github/workflows/   # ci.yml (4 étapes) + cd.yml (build + déploiement)
+├── docker-compose.yml   # db + backend + frontend
+└── docs/                # architecture, déploiement, PSD2, ADR
 ```
 
 ## Démarrage rapide (dev)
@@ -44,11 +43,9 @@ Le workflow `.github/workflows/ci.yml` enchaîne sur chaque push/PR :
 2. **Tests** : `mvn verify` (JUnit 5 + JaCoCo, **seuil de couverture 60 % imposé**) puis
    `npm run test:coverage` (Vitest, **seuils 60 % imposés** dans `vite.config.ts`)
 3. **ESLint** : `npm run lint` (flat config ESLint 9 + eslint-plugin-vue + typescript-eslint)
-4. **SonarQube** : scan vers l'instance **auto-hébergée** (voir `docs/SONARQUBE.md`)
-5. **TypeScript check** : `vue-tsc --noEmit`
+4. **TypeScript check** : `vue-tsc --noEmit`
 
-Secrets GitHub requis : `SONAR_HOST_URL`, `SONAR_TOKEN` (SonarQube), et pour le CD :
-`SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `DEPLOY_PATH`.
+Secrets GitHub requis pour le CD : `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `DEPLOY_PATH`.
 
 ## Production (LXC Proxmox)
 
@@ -71,7 +68,7 @@ secrets uniquement, tokens chiffrés au repos.
 ## Coûts
 
 Tout est gratuit : GitHub (dépôt + Actions), ghcr.io, Docker, PostgreSQL, nginx,
-DuckDNS, Let's Encrypt, SonarQube Community auto-hébergé, ECharts (Apache-2.0).
+DuckDNS, Let's Encrypt, ECharts (Apache-2.0).
 Points payants possibles (signalés à l'avance) : certificat eIDAS/QWAC exigé par certaines
 banques en production PSD2, et éventuellement l'API d'un agrégateur tiers si on en ajoutait
 un (non prévu). Les conseils financiers sont générés par un moteur de règles local (gratuit).
@@ -79,5 +76,5 @@ un (non prévu). Les conseils financiers sont générés par un moteur de règle
 ## Sécurité
 
 Secret scanning GitHub + Dependabot actifs, `.env` jamais committé, HTTPS obligatoire,
-authentification HTTP Basic (BCrypt) en attendant JWT, IBAN stocké masqué uniquement,
+authentification JWT (BCrypt, refresh rotatifs) + 2FA TOTP optionnelle, IBAN stocké masqué uniquement,
 principe RGPD : données sur ton serveur uniquement, effacement possible.
