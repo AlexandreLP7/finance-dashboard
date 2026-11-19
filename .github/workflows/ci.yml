@@ -120,6 +120,8 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          # Plafond memoire du scanner : evite l'OOM-kill du runner sur la petite LXC.
+          SONAR_SCANNER_OPTS: -Xmx512m
 
   typecheck:
     name: 5-TypeScript check (vue-tsc --noEmit)
